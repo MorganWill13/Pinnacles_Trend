@@ -11,6 +11,17 @@ opts_knit$set(root.dir='../')
 ```
 
 ```{r}
+#Packages Used
+library(plyr)    #Version 1.8.6
+library(readr)   #Version 2.1.2
+library(ggplot2) #Version 3.3.5
+library(GGally)  #Version 2.1.2
+library(dplyr)   #Version 1.0.8
+library(mlbench) #Version 2.1.3
+```
+
+
+```{r}
 #Set working directory to local project location
 setwd("/Users/morganwill/Desktop/Pinnacles_Trend")
 #Inport raw data from DSCRTP (Note: "DSCRTP_AllData" is not included in the Git Repo due to its large size. To download this data, go to https://www.ncei.noaa.gov/maps/deep-sea-corals/mapSites.htm)
@@ -22,18 +33,27 @@ DSCRTP_AllData <- read.csv("../Data/DSCRTP_AllData.csv", header = TRUE)
 DSCRTP_AllData <- DSCRTP_AllData[2:nrow(DSCRTP_AllData),]
 head(DSCRTP_AllData)
 ```
+
 # Current data is world-wide, filter to Gulf of Mexico (GOM)
-Potential columns to use:
-* Ocean
-* LargeMarineEcosystem
-* Country
-* FishCouncilRegion
-* Locality
-* Longitude
-* Latitude
+* Potential columns to use: "Ocean", "LargeMarineEcosystem", "Country", "FishCouncilRegion", Locality", Longitude", "Latitude"
+* "FishCouncilRegion" determined to be the best option, due to relatively coarse gradient and percent of entries with this field filled (96.66%)
+```{r}
+#Filter data based on FishCouncilRegion --> FishCouncilRegion = "Gulf of Mexico"
+DSCRTP_GOM <- DSCRTP_AllData %>% filter(FishCouncilRegion=="Gulf of Mexico")
+glimpse(DSCRTP_GOM)
+#678,868 rows in AllData --> 32,991 rows in GOM
+#Quick check that filter worked properly using map:
+
+```
+
+# Filter data for depth range of interest 
+--> Using genus level IDs, mainly because species level IDs of these species are a bit rough. However, the depth ranges that these species live in can be used to filter the genus level data a bit further (ex: I am interested in Swiftia exserta, a mesophotic species, so can filter out the deep-sea swiftia species using depth range identifiers)
+* Potnetial columns to use: "DepthInMeters", "MinimumDepthInMeters", "MaximumDepthInMeters"
+* 
 ```{r}
 
 ```
+
 # Filter Data to species of interest 
 --> Going to stay at genus level: Swiftia, Muricea, Thesea, and Paramuricea
 Potential columns to use:
@@ -44,15 +64,7 @@ Potential columns to use:
 ```{r}
 
 ```
-# Filter data for depth range of interest 
---> Using genus level IDs, mainly because species level IDs of these species are a bit rough. However, the depth ranges that these species live in can be used to filter the genus level data a bit further (ex: I am interested in Paramuricea biscaya, a deep sea species, so can filter out the mesophotic paramuricea species using depth range identifiers)
-Potnetial columns to use:
-* DepthInMeters
-* MinimumDepthInMeters
-* MaximumDepthInMeters
-```{r}
 
-```
 # Now that the data is filtered down a bit, explore what is left.
 Columns used for filtering:
 * 
