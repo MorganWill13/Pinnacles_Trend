@@ -6,14 +6,15 @@ output: word_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+opts_knit$set(root.dir='../')
 ```
 
 ```{r}
 #Set working directory to local project location
-setwd("/Users/morganwill/Desktop/Pinnacles_Area")
+setwd("/Users/morganwill/Desktop/Pinnacles_Trend")
 #Inport raw data from DSCRTP (Note: "DSCRTP_AllData" is not included in the Git Repo due to its large size. To download this data, go to https://www.ncei.noaa.gov/maps/deep-sea-corals/mapSites.htm)
-DSCRTP_AllData <- read.csv("Data/DSCRTP_AllData.csv", header = TRUE)
+DSCRTP_AllData <- read.csv("../Data/DSCRTP_AllData.csv", header = TRUE)
 ```
 
 ```{r}
