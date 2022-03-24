@@ -1,0 +1,94 @@
+---
+title: "DSCRTP_Filtering"
+author: "Morgan Will"
+date: "3/24/2022"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#Set working directory to local project location
+setwd("/Users/morganwill/Desktop/Pinnacles_Area")
+#Inport raw data from DSCRTP (Note: "DSCRTP_AllData" is not included in the Git Repo due to its large size. To download this data, go to https://www.ncei.noaa.gov/maps/deep-sea-corals/mapSites.htm)
+DSCRTP_AllData <- read.csv("Data/DSCRTP_AllData.csv", header = TRUE)
+```
+
+```{r}
+#First row indicates units, need to remove for further analysis:
+DSCRTP_AllData <- DSCRTP_AllData[2:nrow(DSCRTP_AllData),]
+head(DSCRTP_AllData)
+```
+# Current data is world-wide, filter to Gulf of Mexico (GOM)
+Potential columns to use:
+* Ocean
+* LargeMarineEcosystem
+* Country
+* FishCouncilRegion
+* Locality
+* Longitude
+* Latitude
+```{r}
+
+```
+# Filter Data to species of interest 
+--> Going to stay at genus level: Swiftia, Muricea, Thesea, and Paramuricea
+Potential columns to use:
+* ScientificName
+* VerbatimScientificName
+* Genus
+* Species
+```{r}
+
+```
+# Filter data for depth range of interest 
+--> Using genus level IDs, mainly because species level IDs of these species are a bit rough. However, the depth ranges that these species live in can be used to filter the genus level data a bit further (ex: I am interested in Paramuricea biscaya, a deep sea species, so can filter out the mesophotic paramuricea species using depth range identifiers)
+Potnetial columns to use:
+* DepthInMeters
+* MinimumDepthInMeters
+* MaximumDepthInMeters
+```{r}
+
+```
+# Now that the data is filtered down a bit, explore what is left.
+Columns used for filtering:
+* 
+Columns to use moving forward:
+* ObservationDate
+* ObservationYear
+* ObservationTime
+* Vessel
+* PI
+* PIAffiliation
+* Sampling Equipment
+* SampleAreaInSquareMeters
+* footprintWKT
+* footprintSRS
+* IndividualCount
+* CategoricalAbundance
+* Density
+* Cover
+* Condition
+* StartLatitude
+* StartLongitude
+* EndLatitude
+* EndLongitude
+* VerbatimLatitude
+* VerbatimLongitude
+* LocationAccuracy
+* Temperature
+* Salinity
+* Oxygen
+* pH
+* pCO2
+* TA
+* DIC
+* RecordType
+```{r}
+
+```
+
+
+
