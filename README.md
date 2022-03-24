@@ -12,6 +12,7 @@ Structure of Code Base:
       - CSV folder ():
       - Raster folder():
    - Scripts folder ():
+     - DSCRTP_Filtering.Rmd: Filtering large data set downloaded from DSCRTP data portal to location, depth range, and species of interest
    - Outputs folder ():
       - Figures folder ():
       - Final_Data folder ():
