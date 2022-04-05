@@ -9,22 +9,50 @@ output: word_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+```{r}
+library(vegan)
+library(dummies)
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r}
+#DSCRTP data clipped to Pinnacles region and filtered by genus in ArcGIS. Imported here:
+Muricea <- read.csv("../Data/Pinnacles_Muricea_BathyScatter.csv")
+View(Muricea)
+Swiftia <- read.csv("../Data/Pinnacles_Swiftia_BathyScatter.csv")
+View(Swiftia)
+Thesea <- read.csv("../Data/Pinnacles_Thesea_BathyScatter.csv")
+View(Thesea)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r}
+#Muricea
+plot(Muricea$latitude__degrees_north_,Muricea$longitude__degrees_east_)
+#Form a data frame of muricea counts (OID_=site, IndividualCount=abundance) and envirmental data
+Muricea_raw <- data.frame(Muricea$OID_, Muricea$IndividualCount)
+Muricea_env <- data.frame(Muricea$longitude__degrees_east_, Muricea$latitude__degrees_north_,Muricea$DEPTH, Muricea$BACKSCATTER, Muricea$ObservationYear)
+#Compare with rda
+Muricea_rda = rda(Muricea_raw, Muricea_env)
+plot(Muricea_rda)
+```
+```{r}
+#Swiftia
+plot(Swiftia$latitude__degrees_north_,Swiftia$longitude__degrees_east_)
+#Form a data frame of swiftia counts (OID_=site, IndividualCount=abundance) and envirmental data
+Swiftia_raw <- data.frame(Swiftia$OID_, Swiftia$IndividualCount)
+Swiftia_env <- data.frame(Swiftia$longitude__degrees_east_, Swiftia$latitude__degrees_north_, Swiftia$DEPTH, Swiftia$BACKSCATTER, Swiftia$ObservationYear)
+#Compare with rda
+Swiftia_rda = rda(Swiftia_raw, Swiftia_env)
+plot(Swiftia_rda)
+```
+
+```{r}
+#Thesea
+plot(Thesea$latitude__degrees_north_, Thesea$longitude__degrees_east_)
+#Form a data frame of muricea counts (OID_=site, IndividualCount=abundance) and envirmental data
+Thesea_raw <- data.frame(Thesea$OID_, Thesea$IndividualCount)
+Thesea_env <- data.frame(Thesea$latitude__degrees_north_, Thesea$longitude__degrees_east_, Thesea$DEPTH, Thesea$BACKSCATTER, Thesea$ObservationYear)
+#Compare with rda
+Thesea_rda = rda(Thesea_raw, Thesea_env)
+plot(Thesea_rda)
+```
