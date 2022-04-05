@@ -12,8 +12,14 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 library(vegan)
 library(dummies)
+library(maps)
+library(sp)
+library(maptools)
+library(rgdal)
+library(lattice)
+library(classInt)
+library(raster)
 ```
-
 
 ```{r}
 #DSCRTP data clipped to Pinnacles region and filtered by genus in ArcGIS. Imported here:
@@ -26,6 +32,14 @@ View(Thesea)
 ```
 
 ```{r}
+#Rasters of interest
+Bathymetry <- raster(paste0("../Data/USGS_bathy_meso_raster/USGS_bathy_meso_raster.tif"))
+Bathymetry <- setMinMax(Bathymetry)
+Backscatter <- raster(paste0("../Data/USGS_backs_meso_raster/USGS_backs_meso_ras.tif"))
+Backscatter <- setMinMax(Backscatter)
+```
+
+```{r}
 #Muricea
 plot(Muricea$latitude__degrees_north_,Muricea$longitude__degrees_east_)
 #Form a data frame of muricea counts (OID_=site, IndividualCount=abundance) and envirmental data
@@ -34,7 +48,12 @@ Muricea_env <- data.frame(Muricea$longitude__degrees_east_, Muricea$latitude__de
 #Compare with rda
 Muricea_rda = rda(Muricea_raw, Muricea_env)
 plot(Muricea_rda)
+anova(Muricea_rda)
+Muricea_glm <- glm(IndividualCount ~ OID_ + DEPTH + BACKSCATTER + ObservationYear, data=Muricea)
+summary(Muricea_glm)
+plot(Muricea_glm)
 ```
+
 ```{r}
 #Swiftia
 plot(Swiftia$latitude__degrees_north_,Swiftia$longitude__degrees_east_)
@@ -44,6 +63,10 @@ Swiftia_env <- data.frame(Swiftia$longitude__degrees_east_, Swiftia$latitude__de
 #Compare with rda
 Swiftia_rda = rda(Swiftia_raw, Swiftia_env)
 plot(Swiftia_rda)
+anova(Swiftia_rda)
+Swiftia_glm <- glm(IndividualCount ~ OID_ + DEPTH + BACKSCATTER + ObservationYear, data=Swiftia)
+summary(Swiftia_glm)
+plot(Swiftia_glm)
 ```
 
 ```{r}
@@ -55,4 +78,8 @@ Thesea_env <- data.frame(Thesea$latitude__degrees_north_, Thesea$longitude__degr
 #Compare with rda
 Thesea_rda = rda(Thesea_raw, Thesea_env)
 plot(Thesea_rda)
+anova(Thesea_rda)
+Thesea_glm <- glm(IndividualCount ~ OID_ + DEPTH + BACKSCATTER + ObservationYear, data=Thesea)
+summary(Thesea_glm)
+plot(Thesea_glm)
 ```
