@@ -49,9 +49,10 @@ Muricea_env <- data.frame(Muricea$DEPTH, Muricea$BACKSCATTER, Muricea$SLOPE, Mur
 Muricea_rda = rda(Muricea_raw, Muricea_env)
 plot(Muricea_rda)
 anova(Muricea_rda)
-Muricea_glm <- glm(IndividualCount ~ OID_ + DEPTH + BACKSCATTER + SLOPE + ASPECT + SST + ObservationYear, data=Muricea)
-summary(Muricea_glm)
-plot(Muricea_glm)
+#General Linear Model (Poisson)
+Muricea_glm_poisson <- glm(IndividualCount ~ OID_ + DEPTH + BACKSCATTER + SLOPE + ASPECT + SST + ObservationYear, data=Muricea, family=poisson(link="log"))
+summary(Muricea_glm_poisson)
+plot(Muricea_glm_poisson)
 ```
 
 ```{r}
@@ -64,9 +65,11 @@ Swiftia_env <- data.frame(Swiftia$DEPTH, Swiftia$BACKSCATTER, Swiftia$SLOPE, Swi
 Swiftia_rda = rda(Swiftia_raw, Swiftia_env)
 plot(Swiftia_rda)
 anova(Swiftia_rda)
-Swiftia_glm <- glm(IndividualCount ~ OID_ + DEPTH + BACKSCATTER + SLOPE + ASPECT + SST + ObservationYear, data=Swiftia)
+#General Linear Model (Poisson)
+Swiftia_glm <- glm(IndividualCount ~ OID_ + DEPTH + BACKSCATTER + SLOPE + ASPECT + SST + ObservationYear, data=Swiftia, family=poisson(link="log"))
 summary(Swiftia_glm)
 plot(Swiftia_glm)
+
 ```
 
 ```{r}
@@ -79,7 +82,8 @@ Thesea_env <- data.frame(Thesea$DEPTH, Thesea$BACKSCATTER, Thesea$SLOPE, Thesea$
 Thesea_rda = rda(Thesea_raw, Thesea_env)
 plot(Thesea_rda)
 anova(Thesea_rda)
-Thesea_glm <- glm(IndividualCount ~ OID_ + DEPTH + BACKSCATTER + SLOPE + ASPECT + SST + ObservationYear, data=Thesea)
+#General Linear Model (Poisson)
+Thesea_glm <- glm(IndividualCount ~ OID_ + DEPTH + BACKSCATTER + SLOPE + ASPECT + SST + ObservationYear, data=Thesea, family=poisson(link="log"))
 summary(Thesea_glm)
 plot(Thesea_glm)
 ```
