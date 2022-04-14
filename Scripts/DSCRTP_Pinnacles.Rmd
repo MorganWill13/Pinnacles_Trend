@@ -23,11 +23,11 @@ library(raster)
 
 ```{r}
 #DSCRTP data clipped to Pinnacles region and filtered by genus in ArcGIS. Imported here:
-Muricea <- read.csv("../Data/Pinnacles_Muricea_BathyScatter.csv")
+Muricea <- read.csv("../Data/Pinnacles_Muricea_Final.csv")
 View(Muricea)
-Swiftia <- read.csv("../Data/Pinnacles_Swiftia_BathyScatter.csv")
+Swiftia <- read.csv("../Data/Pinnacles_Swiftia_Final.csv")
 View(Swiftia)
-Thesea <- read.csv("../Data/Pinnacles_Thesea_BathyScatter.csv")
+Thesea <- read.csv("../Data/Pinnacles_Thesea_Final.csv")
 View(Thesea)
 ```
 
@@ -44,12 +44,12 @@ Backscatter <- setMinMax(Backscatter)
 plot(Muricea$latitude__degrees_north_,Muricea$longitude__degrees_east_)
 #Form a data frame of muricea counts (OID_=site, IndividualCount=abundance) and envirmental data
 Muricea_raw <- data.frame(Muricea$OID_, Muricea$IndividualCount)
-Muricea_env <- data.frame(Muricea$longitude__degrees_east_, Muricea$latitude__degrees_north_,Muricea$DEPTH, Muricea$BACKSCATTER, Muricea$ObservationYear)
+Muricea_env <- data.frame(Muricea$DEPTH, Muricea$BACKSCATTER, Muricea$SLOPE, Muricea$ASPECT, Muricea$SST, Muricea$ObservationYear)
 #Compare with rda
 Muricea_rda = rda(Muricea_raw, Muricea_env)
 plot(Muricea_rda)
 anova(Muricea_rda)
-Muricea_glm <- glm(IndividualCount ~ OID_ + DEPTH + BACKSCATTER + ObservationYear, data=Muricea)
+Muricea_glm <- glm(IndividualCount ~ OID_ + DEPTH + BACKSCATTER + SLOPE + ASPECT + SST + ObservationYear, data=Muricea)
 summary(Muricea_glm)
 plot(Muricea_glm)
 ```
@@ -59,12 +59,12 @@ plot(Muricea_glm)
 plot(Swiftia$latitude__degrees_north_,Swiftia$longitude__degrees_east_)
 #Form a data frame of swiftia counts (OID_=site, IndividualCount=abundance) and envirmental data
 Swiftia_raw <- data.frame(Swiftia$OID_, Swiftia$IndividualCount)
-Swiftia_env <- data.frame(Swiftia$longitude__degrees_east_, Swiftia$latitude__degrees_north_, Swiftia$DEPTH, Swiftia$BACKSCATTER, Swiftia$ObservationYear)
+Swiftia_env <- data.frame(Swiftia$DEPTH, Swiftia$BACKSCATTER, Swiftia$SLOPE, Swiftia$ASPECT, Swiftia$SST, Swiftia$ObservationYear)
 #Compare with rda
 Swiftia_rda = rda(Swiftia_raw, Swiftia_env)
 plot(Swiftia_rda)
 anova(Swiftia_rda)
-Swiftia_glm <- glm(IndividualCount ~ OID_ + DEPTH + BACKSCATTER + ObservationYear, data=Swiftia)
+Swiftia_glm <- glm(IndividualCount ~ OID_ + DEPTH + BACKSCATTER + SLOPE + ASPECT + SST + ObservationYear, data=Swiftia)
 summary(Swiftia_glm)
 plot(Swiftia_glm)
 ```
@@ -74,12 +74,12 @@ plot(Swiftia_glm)
 plot(Thesea$latitude__degrees_north_, Thesea$longitude__degrees_east_)
 #Form a data frame of muricea counts (OID_=site, IndividualCount=abundance) and envirmental data
 Thesea_raw <- data.frame(Thesea$OID_, Thesea$IndividualCount)
-Thesea_env <- data.frame(Thesea$latitude__degrees_north_, Thesea$longitude__degrees_east_, Thesea$DEPTH, Thesea$BACKSCATTER, Thesea$ObservationYear)
+Thesea_env <- data.frame(Thesea$DEPTH, Thesea$BACKSCATTER, Thesea$SLOPE, Thesea$ASPECT, Thesea$SST, Thesea$ObservationYear)
 #Compare with rda
 Thesea_rda = rda(Thesea_raw, Thesea_env)
 plot(Thesea_rda)
 anova(Thesea_rda)
-Thesea_glm <- glm(IndividualCount ~ OID_ + DEPTH + BACKSCATTER + ObservationYear, data=Thesea)
+Thesea_glm <- glm(IndividualCount ~ OID_ + DEPTH + BACKSCATTER + SLOPE + ASPECT + SST + ObservationYear, data=Thesea)
 summary(Thesea_glm)
 plot(Thesea_glm)
 ```
