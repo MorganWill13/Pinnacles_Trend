@@ -19,6 +19,9 @@ library(rgdal)
 library(lattice)
 library(classInt)
 library(raster)
+library(pscl)
+library(MASS)
+library(GGally)
 ```
 
 ```{r}
@@ -39,6 +42,26 @@ Backscatter <- raster(paste0("../Data/USGS_backs_meso_raster/USGS_backs_meso_ras
 Backscatter <- setMinMax(Backscatter)
 ```
 
+##Visualizing the Data
+
+```{r}
+#Depth
+
+#Backscatter
+
+#Slope
+
+#Aspect
+
+#SST
+
+#Observation Year
+
+```
+
+
+##Modeling
+
 ```{r}
 #Muricea
 plot(Muricea$latitude__degrees_north_,Muricea$longitude__degrees_east_)
@@ -49,11 +72,20 @@ Muricea_env <- data.frame(Muricea$DEPTH, Muricea$BACKSCATTER, Muricea$SLOPE, Mur
 Muricea_rda = rda(Muricea_raw, Muricea_env)
 plot(Muricea_rda)
 anova(Muricea_rda)
+
+#General Linear Model (Gaussian)
+Muricea_gaussian <- glm(IndividualCount ~ OID_ + DEPTH + BACKSCATTER + SLOPE + ASPECT + SST + ObservationYear, data=Muricea, family=gaussian)
+summary(Muricea_gaussian)
 #General Linear Model (Poisson)
-Muricea_glm_poisson <- glm(IndividualCount ~ OID_ + DEPTH + BACKSCATTER + SLOPE + ASPECT + SST + ObservationYear, data=Muricea, family=poisson(link="log"))
-summary(Muricea_glm_poisson)
-plot(Muricea_glm_poisson)
+Muricea_poisson <- glm(IndividualCount ~ OID_ + DEPTH + BACKSCATTER + SLOPE + ASPECT + SST + ObservationYear, data=Muricea, family=poisson)
+summary(Muricea_poisson)
+#General Linear Model (Negative Binomial)
+Muricea_nb <- glm.nb(IndividualCount ~ OID_ + DEPTH + BACKSCATTER + SLOPE + ASPECT + SST + ObservationYear, data=Muricea)
+summary(Muricea_nb)
+#Compare Models
+AIC(Muricea_gaussian, Muricea_poisson, Muricea_nb)
 ```
+
 
 ```{r}
 #Swiftia
@@ -65,25 +97,72 @@ Swiftia_env <- data.frame(Swiftia$DEPTH, Swiftia$BACKSCATTER, Swiftia$SLOPE, Swi
 Swiftia_rda = rda(Swiftia_raw, Swiftia_env)
 plot(Swiftia_rda)
 anova(Swiftia_rda)
-#General Linear Model (Poisson)
-Swiftia_glm <- glm(IndividualCount ~ OID_ + DEPTH + BACKSCATTER + SLOPE + ASPECT + SST + ObservationYear, data=Swiftia, family=poisson(link="log"))
-summary(Swiftia_glm)
-plot(Swiftia_glm)
 
+#General Linear Model (Gaussian)
+Swiftia_gaussian <- glm(IndividualCount ~ OID_ + DEPTH + BACKSCATTER + SLOPE + ASPECT + SST + ObservationYear, data=Swiftia, family=gaussian)
+summary(Swiftia_gaussian)
+#General Linear Model (Poisson)
+Swiftia_poisson <- glm(IndividualCount ~ OID_ + DEPTH + BACKSCATTER + SLOPE + ASPECT + SST + ObservationYear, data=Swiftia, family=poisson)
+summary(Swiftia_poisson)
+#General Linear Model (Negative Binomial)
+Swiftia_nb <- glm.nb(IndividualCount ~ OID_ + DEPTH + BACKSCATTER + SLOPE + ASPECT + SST + ObservationYear, data=Swiftia)
+summary(Swiftia_nb)
+#Compare Models
+AIC(Swiftia_gaussian, Swiftia_poisson, Swiftia_nb)
 ```
 
 ```{r}
 #Thesea
 plot(Thesea$latitude__degrees_north_, Thesea$longitude__degrees_east_)
-#Form a data frame of muricea counts (OID_=site, IndividualCount=abundance) and envirmental data
+#Form a data frame of thesea counts (OID_=site, IndividualCount=abundance) and envirmental data
 Thesea_raw <- data.frame(Thesea$OID_, Thesea$IndividualCount)
 Thesea_env <- data.frame(Thesea$DEPTH, Thesea$BACKSCATTER, Thesea$SLOPE, Thesea$ASPECT, Thesea$SST, Thesea$ObservationYear)
 #Compare with rda
 Thesea_rda = rda(Thesea_raw, Thesea_env)
 plot(Thesea_rda)
 anova(Thesea_rda)
+
+#General Linear Model (Gaussian)
+Thesea_gaussian <- glm(IndividualCount ~ OID_ + DEPTH + BACKSCATTER + SLOPE + ASPECT + SST + ObservationYear, data=Thesea, family=gaussian)
+summary(Thesea_gaussian)
 #General Linear Model (Poisson)
-Thesea_glm <- glm(IndividualCount ~ OID_ + DEPTH + BACKSCATTER + SLOPE + ASPECT + SST + ObservationYear, data=Thesea, family=poisson(link="log"))
-summary(Thesea_glm)
-plot(Thesea_glm)
+Thesea_poisson <- glm(IndividualCount ~ OID_ + DEPTH + BACKSCATTER + SLOPE + ASPECT + SST + ObservationYear, data=Thesea, family=poisson)
+summary(Thesea_poisson)
+#General Linear Model (Negative Binomial)
+Thesea_nb <- glm.nb(IndividualCount ~ OID_ + DEPTH + BACKSCATTER + SLOPE + ASPECT + SST + ObservationYear, data=Thesea)
+summary(Thesea_nb)
+#Compare Models
+AIC(Thesea_gaussian, Thesea_poisson, Thesea_nb)
+
 ```
+```{r}
+#Evaluating all three groups in a single model
+AllGroups <- rbind(Muricea, Swiftia, Thesea)
+#Form a data frame of counts (OID_=site, IndividualCount=abundance) and environmental data
+AllGroups_raw <- data.frame(AllGroups$OID_, AllGroups$IndividualCount)
+AllGroups_env <- data.frame(AllGroups$DEPTH, AllGroups$BACKSCATTER, AllGroups$SLOPE, AllGroups$ASPECT, AllGroups$SST, AllGroups$ObservationYear)
+#Compare with rda
+AllGroups_rda = rda(AllGroups_raw, AllGroups_env)
+plot(AllGroups_rda)
+anova(AllGroups_rda)
+
+#General Linear Model (Gaussian)
+AllGroups_gaussian <- glm(IndividualCount ~ OID_ + DEPTH + BACKSCATTER + SLOPE + ASPECT + SST + ObservationYear, data=AllGroups, family=gaussian)
+summary(AllGroups_gaussian)
+#General Linear Model (Poisson)
+AllGroups_poisson <- glm(IndividualCount ~ OID_ + DEPTH + BACKSCATTER + SLOPE + ASPECT + SST + ObservationYear, data=AllGroups, family=poisson)
+summary(AllGroups_poisson)
+#General Linear Model (Negative Binomial)
+AllGroups_nb <- glm.nb(IndividualCount ~ OID_ + DEPTH + BACKSCATTER + SLOPE + ASPECT + SST + ObservationYear, data=AllGroups)
+summary(AllGroups_nb)
+#Compare Models
+AIC(AllGroups_gaussian, AllGroups_poisson, AllGroups_nb)
+```
+
+##Compare Single Group vs Multi-Group Models
+
+```{r}
+#AIC (smaller value = better fit)
+AIC(Muricea_nb, Swiftia_nb, Thesea_nb, AllGroups_nb)
+```
+
