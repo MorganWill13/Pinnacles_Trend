@@ -10,6 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
+#Packages used
 library(vegan)
 library(dummies)
 library(maps)
@@ -22,6 +23,8 @@ library(raster)
 library(pscl)
 library(MASS)
 library(GGally)
+library(dplyr)
+library(easyCODA)
 ```
 
 ```{r}
@@ -71,7 +74,6 @@ ggplot(AllGroups, aes(x=ObservationYear))+
   facet_grid(Genus~.)
 ```
 
-
 ##Modeling
 
 ```{r}
@@ -81,7 +83,7 @@ plot(Muricea$latitude__degrees_north_,Muricea$longitude__degrees_east_)
 Muricea_raw <- data.frame(Muricea$OID_, Muricea$IndividualCount)
 Muricea_env <- data.frame(Muricea$DEPTH, Muricea$BACKSCATTER, Muricea$SLOPE, Muricea$ASPECT, Muricea$SST, Muricea$ObservationYear)
 #Compare with rda
-Muricea_rda = rda(Muricea_raw, Muricea_env)
+Muricea_rda <- rda(Muricea_raw, Muricea_env)
 plot(Muricea_rda)
 anova(Muricea_rda)
 
@@ -106,9 +108,13 @@ plot(Swiftia$latitude__degrees_north_,Swiftia$longitude__degrees_east_)
 Swiftia_raw <- data.frame(Swiftia$OID_, Swiftia$IndividualCount)
 Swiftia_env <- data.frame(Swiftia$DEPTH, Swiftia$BACKSCATTER, Swiftia$SLOPE, Swiftia$ASPECT, Swiftia$SST, Swiftia$ObservationYear)
 #Compare with rda
-Swiftia_rda = rda(Swiftia_raw, Swiftia_env)
-plot(Swiftia_rda)
+Swiftia_rda <- rda(Swiftia_raw, Swiftia_env)
 anova(Swiftia_rda)
+plot(Swiftia_rda) #this plot is hard to read, trying to make a fancier one below
+
+#Compare with PCA
+Swiftia_pca <- prcomp(Swiftia[,c(1,55,117,118,119,120,121)], center=TRUE, scale.=TRUE)
+summary(Swiftia_pca)
 
 #General Linear Model (Gaussian)
 Swiftia_gaussian <- glm(IndividualCount ~ OID_ + DEPTH + BACKSCATTER + SLOPE + ASPECT + SST + ObservationYear, data=Swiftia, family=gaussian)
@@ -130,7 +136,7 @@ plot(Thesea$latitude__degrees_north_, Thesea$longitude__degrees_east_)
 Thesea_raw <- data.frame(Thesea$OID_, Thesea$IndividualCount)
 Thesea_env <- data.frame(Thesea$DEPTH, Thesea$BACKSCATTER, Thesea$SLOPE, Thesea$ASPECT, Thesea$SST, Thesea$ObservationYear)
 #Compare with rda
-Thesea_rda = rda(Thesea_raw, Thesea_env)
+Thesea_rda <- rda(Thesea_raw, Thesea_env)
 plot(Thesea_rda)
 anova(Thesea_rda)
 
@@ -154,7 +160,7 @@ AllGroups <- rbind(Muricea, Swiftia, Thesea)
 AllGroups_raw <- data.frame(AllGroups$OID_, AllGroups$IndividualCount)
 AllGroups_env <- data.frame(AllGroups$DEPTH, AllGroups$BACKSCATTER, AllGroups$SLOPE, AllGroups$ASPECT, AllGroups$SST, AllGroups$ObservationYear)
 #Compare with rda
-AllGroups_rda = rda(AllGroups_raw, AllGroups_env)
+AllGroups_rda <- rda(AllGroups_raw, AllGroups_env)
 plot(AllGroups_rda)
 anova(AllGroups_rda)
 
