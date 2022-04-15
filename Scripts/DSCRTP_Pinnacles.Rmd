@@ -46,17 +46,29 @@ Backscatter <- setMinMax(Backscatter)
 
 ```{r}
 #Depth
-
+ggplot(AllGroups, aes(x=DepthInMeters__m_))+
+  geom_histogram(color="darkblue", fill="lightblue")+
+  facet_grid(Genus~.)
 #Backscatter
-
+ggplot(AllGroups, aes(x=BACKSCATTER))+
+  geom_histogram(color="darkblue", fill="lightblue")+
+  facet_grid(Genus~.)
 #Slope
-
+ggplot(AllGroups, aes(x=SLOPE))+
+  geom_histogram(color="darkblue", fill="lightblue")+
+  facet_grid(Genus~.)
 #Aspect
-
-#SST
-
+ggplot(AllGroups, aes(x=ASPECT))+
+  geom_histogram(color="darkblue", fill="lightblue")+
+  facet_grid(Genus~.)
+#SST --> very coarse data set, need to find a better source
+ggplot(AllGroups, aes(x=SST))+
+  geom_histogram(color="darkblue", fill="lightblue")+
+  facet_grid(Genus~.)
 #Observation Year
-
+ggplot(AllGroups, aes(x=ObservationYear))+
+  geom_histogram(color="darkblue", fill="lightblue")+
+  facet_grid(Genus~.)
 ```
 
 
