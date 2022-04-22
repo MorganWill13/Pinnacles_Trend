@@ -6,7 +6,7 @@ output: word_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, tidy = TRUE)
 ```
 
 ```{r}
@@ -25,25 +25,64 @@ library(MASS)
 library(GGally)
 library(dplyr)
 library(easyCODA)
+library(DescTools)
+```
+
+```{r}
+```{r}
+#Rasters of interest
+DEPTH <- raster(paste0("../Data/USGS_bathy_raster/bathy.tif"))
+Backscatter <- raster(paste0("../Data/USGS_mos_raster/mos.tif"))
+Slope <- raster(paste0("../Data/USGS_slope_raster/slope.tif"))
+Aspect <- raster(paste0("../Data/USGS_aspect_raster/aspect.tif"))
+
+#Build raster stack
+
+BACKSCATTER <- raster(vals=values(Backscatter), ext=extent(DEPTH),
+                      crs=crs(DEPTH), nrows=dim(DEPTH)[1], 
+                      ncols=dim(DEPTH)[2])
+SLOPE <- raster(vals=values(Slope), ext=extent(DEPTH),
+                crs=crs(DEPTH), nrows=dim(DEPTH)[1], 
+                ncols=dim(DEPTH)[2])
+ASPECT <- raster(vals=values(Aspect), ext=extent(DEPTH),
+                 crs=crs(DEPTH), nrows=dim(DEPTH)[1],
+                 ncols=dim(DEPTH)[2])
+
+# now replacing zeros with NA
+BACKSCATTER <- calc(BACKSCATTER, function(x) ifelse(x == 0, NA, x))
+
+# now cover the other layers with NA's based upon DEPTH
+DEPTH <- mask(DEPTH, BACKSCATTER)
+SLOPE <- mask(SLOPE, BACKSCATTER)
+ASPECT <- mask(ASPECT, BACKSCATTER)
+
+AllRasters <- stack(DEPTH, BACKSCATTER, SLOPE, ASPECT)
+names(AllRasters) <- c('DEPTH', 'BACKSCATTER', 'SLOPE', 'ASPECT')
+View(AllRasters)
 ```
 
 ```{r}
 #DSCRTP data clipped to Pinnacles region and filtered by genus in ArcGIS. Imported here:
 Muricea <- read.csv("../Data/Pinnacles_Muricea_Final.csv")
+Muricea  <- SpatialPointsDataFrame(Muricea [ , c("longitude__degrees_east_", "latitude__degrees_north_")],
+                              Muricea,
+                              proj4string = CRS(proj4string(AllRasters)))
 View(Muricea)
 Swiftia <- read.csv("../Data/Pinnacles_Swiftia_Final.csv")
+Swiftia  <- SpatialPointsDataFrame(Swiftia [ , c("longitude__degrees_east_", "latitude__degrees_north_")],
+                              Swiftia,
+                              proj4string = CRS(proj4string(AllRasters)))
 View(Swiftia)
 Thesea <- read.csv("../Data/Pinnacles_Thesea_Final.csv")
+Thesea  <- SpatialPointsDataFrame(Thesea [ , c("longitude__degrees_east_", "latitude__degrees_north_")],
+                              Thesea,
+                              proj4string = CRS(proj4string(AllRasters)))
 View(Thesea)
 ```
 
-```{r}
-#Rasters of interest
-Bathymetry <- raster(paste0("../Data/USGS_bathy_meso_raster/USGS_bathy_meso_raster.tif"))
-Bathymetry <- setMinMax(Bathymetry)
-Backscatter <- raster(paste0("../Data/USGS_backs_meso_raster/USGS_backs_meso_ras.tif"))
-Backscatter <- setMinMax(Backscatter)
-```
+
+
+
 
 ##Visualizing the Data
 
@@ -81,23 +120,42 @@ ggplot(AllGroups, aes(x=ObservationYear))+
 plot(Muricea$latitude__degrees_north_,Muricea$longitude__degrees_east_)
 #Form a data frame of muricea counts (OID_=site, IndividualCount=abundance) and envirmental data
 Muricea_raw <- data.frame(Muricea$OID_, Muricea$IndividualCount)
-Muricea_env <- data.frame(Muricea$DEPTH, Muricea$BACKSCATTER, Muricea$SLOPE, Muricea$ASPECT, Muricea$SST, Muricea$ObservationYear)
+Muricea_env <- data.frame(Muricea$OID_, Muricea$DEPTH, Muricea$BACKSCATTER, Muricea$SLOPE, Muricea$ASPECT, Muricea$SST, Muricea$ObservationYear)
 #Compare with rda
 Muricea_rda <- rda(Muricea_raw, Muricea_env)
 plot(Muricea_rda)
 anova(Muricea_rda)
 
+# extract enviornment for model building
+muricea_env <- as.data.frame(extract(AllRasters, Muricea))
+
 #General Linear Model (Gaussian)
-Muricea_gaussian <- glm(IndividualCount ~ OID_ + DEPTH + BACKSCATTER + SLOPE + ASPECT + SST + ObservationYear, data=Muricea, family=gaussian)
+Muricea_gaussian <- glm(Muricea$IndividualCount ~  DEPTH + BACKSCATTER + SLOPE + ASPECT ,
+                        data=muricea_env, family=gaussian)
 summary(Muricea_gaussian)
+
+#observed predicted plots
+plot(Muricea$IndividualCount, predict(Muricea_gaussian))
+
+
+
 #General Linear Model (Poisson)
 Muricea_poisson <- glm(IndividualCount ~ OID_ + DEPTH + BACKSCATTER + SLOPE + ASPECT + SST + ObservationYear, data=Muricea, family=poisson)
 summary(Muricea_poisson)
 #General Linear Model (Negative Binomial)
-Muricea_nb <- glm.nb(IndividualCount ~ OID_ + DEPTH + BACKSCATTER + SLOPE + ASPECT + SST + ObservationYear, data=Muricea)
+Muricea_nb <- glm.nb(IndividualCount ~ DEPTH + BACKSCATTER + SLOPE + ASPECT, data=Muricea)
 summary(Muricea_nb)
 #Compare Models
-AIC(Muricea_gaussian, Muricea_poisson, Muricea_nb)
+AIC(Muricea_gaussian, Muricea_poisson, Muricea_nb) #nb had lowest AIC, so best fit (penalizes for model complexity)
+PseudoR2(Muricea_gaussian, which = NULL) #0.02077
+PseudoR2(Muricea_poisson, which = NULL) #0.13157 --> best fit based on pseudo r2
+PseudoR2(Muricea_nb, which = NULL) #0.04123
+#In solutions, predicted vs observed
+
+#Generate raster
+Muricea_raster <- as.data.frame(AllRasters)
+View(as.data.frame(Muricea_raster))
+tmp <- predict(AllRasters, Muricea_nb)
 ```
 
 
@@ -126,7 +184,10 @@ summary(Swiftia_poisson)
 Swiftia_nb <- glm.nb(IndividualCount ~ OID_ + DEPTH + BACKSCATTER + SLOPE + ASPECT + SST + ObservationYear, data=Swiftia)
 summary(Swiftia_nb)
 #Compare Models
-AIC(Swiftia_gaussian, Swiftia_poisson, Swiftia_nb)
+AIC(Swiftia_gaussian, Swiftia_poisson, Swiftia_nb) #nb had lowest AIC, so best fit
+PseudoR2(Swiftia_gaussian, which = NULL) #0.00874
+PseudoR2(Swiftia_poisson, which = NULL) #0.09613 --> best fit based on pseudo r2
+PseudoR2(Swiftia_nb, which = NULL) #0.04355
 ```
 
 ```{r}
@@ -150,8 +211,10 @@ summary(Thesea_poisson)
 Thesea_nb <- glm.nb(IndividualCount ~ OID_ + DEPTH + BACKSCATTER + SLOPE + ASPECT + SST + ObservationYear, data=Thesea)
 summary(Thesea_nb)
 #Compare Models
-AIC(Thesea_gaussian, Thesea_poisson, Thesea_nb)
-
+AIC(Thesea_gaussian, Thesea_poisson, Thesea_nb) #nb had lowest AIC, so best fit
+PseudoR2(Thesea_gaussian, which = NULL) #0.02670
+PseudoR2(Thesea_poisson, which = NULL) #0.10877 --> best fit based on pseudo r2
+PseudoR2(Thesea_nb, which = NULL) #0.06573
 ```
 ```{r}
 #Evaluating all three groups in a single model
@@ -174,7 +237,10 @@ summary(AllGroups_poisson)
 AllGroups_nb <- glm.nb(IndividualCount ~ OID_ + DEPTH + BACKSCATTER + SLOPE + ASPECT + SST + ObservationYear, data=AllGroups)
 summary(AllGroups_nb)
 #Compare Models
-AIC(AllGroups_gaussian, AllGroups_poisson, AllGroups_nb)
+AIC(AllGroups_gaussian, AllGroups_poisson, AllGroups_nb) #nb had lowest AIC, so best fit
+PseudoR2(AllGroups_gaussian, which = NULL) #0.00501
+PseudoR2(AllGroups_poisson, which = NULL) #0.05437 --> best fit based on pseudo r2
+PseudoR2(AllGroups_nb, which = NULL) #0.02665
 ```
 
 ##Compare Single Group vs Multi-Group Models
